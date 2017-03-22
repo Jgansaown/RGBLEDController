@@ -20,7 +20,7 @@ import java.util.UUID;
 
 public class MainActivity extends AppCompatActivity{
     private static final String TAG = "MainActivity";
-    static final int PICK_COLOR_REQUEST = 1;
+    static final int REQUEST_PICK_COLOR = 1;
     static final int REQUEST_ENABLE_BT = 2;
     //bluetooth device config
     private final String deviceMAC = "98:D3:31:60:22:72";
@@ -33,10 +33,8 @@ public class MainActivity extends AppCompatActivity{
     //ui
     Button btnSend;
     EditText etSend;
-    Button btnDisconnect;
     TextView connectionStatus;
 
-    boolean btOn = false;
     boolean isConnected = false;
 
 
@@ -50,18 +48,21 @@ public class MainActivity extends AppCompatActivity{
 
 
         btnSend = (Button) findViewById(R.id.btnSend);
-        btnDisconnect = (Button) findViewById(R.id.btnDisconnect);
         etSend = (EditText) findViewById(R.id.editText);
         connectionStatus = (TextView) findViewById(R.id.textView2);
 
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        if (mBluetoothAdapter == null){
+            Log.d(TAG, "enableDisableBT: Does not have BT capabilities.");
+            // TODO add message dialog
+        }else if (!mBluetoothAdapter.isEnabled()){
+            Intent enableBTIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBTIntent, REQUEST_ENABLE_BT);
+        }
+
         //Broadcasts when bond state changes (ie:pairing)
         IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
         registerReceiver(mBroadcastReceiver4, filter);
-
-        btOn = mBluetoothAdapter.isEnabled();
-
-        Log.d(TAG, "bt is :" + btOn);
 
 
         btnSend.setOnClickListener(new View.OnClickListener() {
@@ -75,16 +76,6 @@ public class MainActivity extends AppCompatActivity{
                 }
             }
         });
-        btnDisconnect.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Log.d(TAG, "btnDisconnect: clicked");
-                if (mBluetoothConnection != null){
-                    Log.d(TAG, "btnDisconnect: closing bluetooth connection");
-                    mBluetoothConnection.close();
-                }
-            }
-        });
     }
     @Override
     protected void onDestroy() {
@@ -93,7 +84,6 @@ public class MainActivity extends AppCompatActivity{
         if (isFinishing()){
             Log.d(TAG, "onDestroy: isFinishing");
             if (mBluetoothConnection != null){
-
                 mBluetoothConnection.close();
             }
         }
@@ -112,7 +102,7 @@ public class MainActivity extends AppCompatActivity{
 
     public void pickColor(View view){
         Intent intent = new Intent(this, ColorSelector.class);
-        startActivityForResult(intent, PICK_COLOR_REQUEST);
+        startActivityForResult(intent, REQUEST_PICK_COLOR);
     }
 
 
@@ -122,12 +112,18 @@ public class MainActivity extends AppCompatActivity{
     protected void onActivityResult(int requestCode,int resultCode,Intent data){
         TextView test = (TextView) findViewById(R.id.textView8);
         // Check which request we're responding to
-        if (requestCode == PICK_COLOR_REQUEST) {// Make sure the request was successful
+        if (requestCode == REQUEST_PICK_COLOR) {// Make sure the request was successful
             if (resultCode == RESULT_OK) {
                 test.setBackgroundColor(data.getIntExtra("color", 0));
             }
+        }else if (requestCode == REQUEST_ENABLE_BT){
+            if (resultCode == RESULT_OK){
+                Log.d(TAG, "request bluetooth: ok");
+            }else if (resultCode == RESULT_CANCELED){
+                Log.d(TAG, "request bluetooth: canceled");
+                isConnected = false;
+            }
         }
-
     }
 
 
@@ -155,19 +151,32 @@ public class MainActivity extends AppCompatActivity{
         }
     }
 
-public void connectDisconnect(View view){
-    if (isConnected){
-        disconnet();
-        isConnected = false;
-    }else{
-        connect();
-        isConnected = true;
+    //button control for connecting/disconnecting to device
+    public void connectDisconnect(View view){
+        if (isConnected){
+            disconnet();
+            isConnected = false;
+        }else{
+            connect();
+            isConnected = true;
+        }
     }
-}
-
-
+    void connect(){
+        //if bluetooth is not enabled, turn it on
+        if (!mBluetoothAdapter.isEnabled()){
+            //prompt user to enable bluetooth
+            //then if it's enabled, connect to device (mBroadcastReceiver1)
+            Log.d(TAG, "connect: enabling bluetooth");
+            enableBluetooth();
+        }else{
+            //bt is already enabled
+            //connect to device
+            Log.d(TAG, "connect: connecting to device");
+            connectToDevice();
+        }
+    }
     void connectToDevice(){
-        Log.d(TAG, "connectToDevice: clicked");
+        Log.d(TAG, "connectToDevice: started");
         mBTDevice = mBluetoothAdapter.getRemoteDevice(deviceMAC);
         mBTDevice.createBond();
         Log.d(TAG, "onItemClick: deviceName = " + mBTDevice.getName());
@@ -177,57 +186,27 @@ public void connectDisconnect(View view){
         mBluetoothConnection = new BluetoothConnectionService(MainActivity.this);
         startBTConnection(mBTDevice, MY_UUID_INSECURE);
     }
-
-    void connect(){
-        if (!btOn){
-            connectBluetooth();
-            btOn = true;
-            Log.d(TAG, "bt turned on");
-        }
-        Log.d(TAG, "exit connect");
-    }
-
     void disconnet(){
-        if (btOn){
-            disconnectBluetooth();
-            Log.d(TAG, "bt turned off");
+        if (mBluetoothConnection != null){
+            Log.d(TAG, "disconnect: closing bluetooth connection");
+            mBluetoothConnection.close();
+            Log.d(TAG, "disconnect: bluetooth connection closed");
         }
-        Log.d(TAG, "exit disconnect");
     }
 
-    void connectBluetooth() {
-        Intent enableBTIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-        startActivityForResult(enableBTIntent, REQUEST_ENABLE_BT);
+    //enables bluetooth
+    void enableBluetooth() {
+        if (mBluetoothAdapter == null){
+            Log.d(TAG, "enableDisableBT: Does not have BT capabilities.");
+            // TODO add message dialog
+        }else {
+            Intent enableBTIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
+            startActivityForResult(enableBTIntent, REQUEST_ENABLE_BT);
 
-        IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-        registerReceiver(mBroadcastReceiver1, BTIntent);
+            IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+            registerReceiver(mBroadcastReceiver1, BTIntent);
+        }
     }
-    void disconnectBluetooth(){
-        mBluetoothAdapter.disable();
-
-        IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-        registerReceiver(mBroadcastReceiver1, BTIntent);
-    }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
     //BroadcastReceiver
     // Create a BroadcastReceiver for ACTION_FOUND.
@@ -241,9 +220,8 @@ public void connectDisconnect(View view){
                 TextView text = (TextView) findViewById(R.id.textView4);
                 switch (state) {
                     case BluetoothAdapter.STATE_OFF:
-                        Log.d(TAG, "onReceive: STATE OFF");
+                        Log.d(TAG, "onReceive: STATE OFF ");
                         text.setText("Bluetooth is off");
-                        btOn = false;
                         break;
                     case BluetoothAdapter.STATE_TURNING_OFF:
                         Log.d(TAG, "mBroadcastReceiver1: STATE TURNING OFF");
@@ -251,7 +229,9 @@ public void connectDisconnect(View view){
                     case BluetoothAdapter.STATE_ON:
                         Log.d(TAG, "mBroadcastReceiver1: STATE ON");
                         text.setText("Bluetooth is on");
-                        btOn = true;
+                        //bt is enabled
+                        //so connect to device
+                        connectToDevice();
                         break;
                     case BluetoothAdapter.STATE_TURNING_ON:
                         Log.d(TAG, "mBroadcastReceiver1: STATE TURNING ON");

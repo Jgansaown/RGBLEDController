@@ -54,14 +54,17 @@ class BluetoothConnectionService {
     }
     //shutdown all bt connections
     void close() {
-        if (mConnectThread != null) {
-            mConnectThread.cancel();
-            mConnectThread = null;
-        }
         if (mConnectedThread != null) {
+            Log.d(TAG, "close: closing connected thread.");
             mConnectedThread.cancel();
             mConnectedThread = null;
         }
+        if (mConnectThread != null) {
+            Log.d(TAG, "close: closing connect thread.");
+            mConnectThread.cancel();
+            mConnectThread = null;
+        }
+
     }
 
     /**private functions**/
@@ -208,11 +211,19 @@ class BluetoothConnectionService {
         /* Call this from the main activity to shutdown the connection */
         void cancel() {
             try {
-                mmInStream.close();
-                mmOutStream.close();
-                mmSocket.close();
-
-            } catch (IOException ignored) { }
+                if (mmInStream != null){
+                    mmInStream.close();
+                }
+                if (mmOutStream != null) {
+                    mmOutStream.close();
+                }
+                if (mmSocket != null) {
+                    mmSocket.close();
+                }
+                Log.d(TAG, "cancel: closed connected thread.");
+            } catch (IOException ignored) {
+                Log.e(TAG, "write: Error closing streams. " + ignored.getMessage() );
+            }
         }
     }
 }
