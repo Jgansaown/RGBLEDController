@@ -25,15 +25,13 @@ public class MainActivity extends AppCompatActivity{
     //bluetooth device config
     private final String deviceMAC = "98:D3:31:60:22:72";
     private static final UUID MY_UUID_INSECURE = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
+    //ui
+    TextView tvBTStatus;
     //bluetooth
     BluetoothConnectionService mBluetoothConnection;
     BluetoothAdapter mBluetoothAdapter;
     BluetoothDevice mBTDevice;
 
-    //ui
-    Button btnSend;
-    EditText etSend;
-    TextView connectionStatus;
 
     boolean isConnected = false;
 
@@ -44,14 +42,11 @@ public class MainActivity extends AppCompatActivity{
         setContentView(R.layout.activity_main);
         //lock app to portrait orientation
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-
-
-
-        btnSend = (Button) findViewById(R.id.btnSend);
-        etSend = (EditText) findViewById(R.id.editText);
-        connectionStatus = (TextView) findViewById(R.id.textView2);
-
+        //initialize ui components
+        tvBTStatus = (TextView) findViewById(R.id.tvBTStatus);
+        //initialize bluetooth adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+        //enable bluetooth
         if (mBluetoothAdapter == null){
             Log.d(TAG, "enableDisableBT: Does not have BT capabilities.");
             // TODO add message dialog
@@ -59,24 +54,15 @@ public class MainActivity extends AppCompatActivity{
             Intent enableBTIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBTIntent, REQUEST_ENABLE_BT);
         }
-
-        //Broadcasts when bond state changes (ie:pairing)
-        IntentFilter filter = new IntentFilter(BluetoothDevice.ACTION_BOND_STATE_CHANGED);
-        registerReceiver(mBroadcastReceiver4, filter);
-
-
-        btnSend.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view){
-                try{
-                    byte[] bytes = etSend.getText().toString().getBytes(Charset.defaultCharset());
-                    mBluetoothConnection.write(bytes);
-                }catch (NullPointerException e){
-                    Log.e(TAG, "btnSend: " + e.getMessage());
-                }
-            }
-        });
     }
+
+
+
+
+
+
+
+
     @Override
     protected void onDestroy() {
         Log.d(TAG, "onDestroy: called");
@@ -91,11 +77,6 @@ public class MainActivity extends AppCompatActivity{
             unregisterReceiver(mBroadcastReceiver1);
         }catch (RuntimeException e){
             Log.d(TAG, "onDestroy: mBroadcastReceiver1 not registered");
-        }
-        try {
-            unregisterReceiver(mBroadcastReceiver4);
-        }catch (RuntimeException e){
-            Log.d(TAG, "onDestroy: mBroadcastReceiver4 not registered");
         }
     }
 
@@ -208,6 +189,15 @@ public class MainActivity extends AppCompatActivity{
         }
     }
 
+    void writeToBTDevice(String message){
+        try{
+            byte[] bytes = message.getBytes(Charset.defaultCharset());
+            mBluetoothConnection.write(bytes);
+        }catch (NullPointerException e){
+            Log.e(TAG, "btnSend: " + e.getMessage());
+        }
+    }
+
     //BroadcastReceiver
     // Create a BroadcastReceiver for ACTION_FOUND.
     private final BroadcastReceiver mBroadcastReceiver1 = new BroadcastReceiver() {
@@ -217,18 +207,15 @@ public class MainActivity extends AppCompatActivity{
             if (action.equals(mBluetoothAdapter.ACTION_STATE_CHANGED)) {
                 final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, mBluetoothAdapter.ERROR);
 
-                TextView text = (TextView) findViewById(R.id.textView4);
                 switch (state) {
                     case BluetoothAdapter.STATE_OFF:
                         Log.d(TAG, "onReceive: STATE OFF ");
-                        text.setText("Bluetooth is off");
                         break;
                     case BluetoothAdapter.STATE_TURNING_OFF:
                         Log.d(TAG, "mBroadcastReceiver1: STATE TURNING OFF");
                         break;
                     case BluetoothAdapter.STATE_ON:
                         Log.d(TAG, "mBroadcastReceiver1: STATE ON");
-                        text.setText("Bluetooth is on");
                         //bt is enabled
                         //so connect to device
                         connectToDevice();
@@ -236,31 +223,6 @@ public class MainActivity extends AppCompatActivity{
                     case BluetoothAdapter.STATE_TURNING_ON:
                         Log.d(TAG, "mBroadcastReceiver1: STATE TURNING ON");
                         break;
-                }
-            }
-        }
-    };
-    private BroadcastReceiver mBroadcastReceiver4 = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final String action = intent.getAction();
-
-            if (action.equals(BluetoothDevice.ACTION_BOND_STATE_CHANGED)){
-                BluetoothDevice mDevice = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
-                //3 cases
-                //case1: bonded already
-                if (mDevice.getBondState() == BluetoothDevice.BOND_BONDED){
-                    Log.d(TAG, "BroadcastReceiver: BOND_BONDED");
-
-                    mBTDevice = mDevice;
-                }
-                //case2: creating a bond
-                if (mDevice.getBondState() == BluetoothDevice.BOND_BONDING){
-                    Log.d(TAG, "BroadcastReceiver: BOND_BONDING");
-                }
-                //case1: breaking a bond
-                if (mDevice.getBondState() == BluetoothDevice.BOND_NONE) {
-                    Log.d(TAG, "BroadcastReceiver: BOND_NONE");
                 }
             }
         }
