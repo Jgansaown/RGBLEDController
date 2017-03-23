@@ -1,5 +1,6 @@
 package com.example.jason_desktop.rgbledcontroller;
 
+import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.content.BroadcastReceiver;
@@ -7,13 +8,16 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
+import android.graphics.Color;
+import android.provider.CalendarContract;
+import android.support.v4.content.ContextCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
-import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
+
+import org.w3c.dom.Text;
 
 import java.nio.charset.Charset;
 import java.util.UUID;
@@ -27,14 +31,25 @@ public class MainActivity extends AppCompatActivity{
     private static final UUID MY_UUID_INSECURE = UUID.fromString("00001101-0000-1000-8000-00805f9b34fb");
     //ui
     TextView tvBTStatus;
+    TextView tvDeviceStatus;
     //bluetooth
     BluetoothConnectionService mBluetoothConnection;
     BluetoothAdapter mBluetoothAdapter;
     BluetoothDevice mBTDevice;
 
-
+    private ProgressDialog mDisconnectProgressDialog;
     boolean isConnected = false;
+    boolean isBTOn = false;
+    boolean toConnect = false;
 
+    void setDeviceStatus(String status, int color){
+        tvDeviceStatus.setText(status);
+        tvDeviceStatus.setTextColor(ContextCompat.getColor(this, color));
+    }
+    void setBTStatus(String status, int color){
+        tvBTStatus.setText(status);
+        tvBTStatus.setTextColor(ContextCompat.getColor(this, color));
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,8 +59,21 @@ public class MainActivity extends AppCompatActivity{
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         //initialize ui components
         tvBTStatus = (TextView) findViewById(R.id.tvBTStatus);
+        tvDeviceStatus = (TextView) findViewById(R.id.tvDeviceStatus);
         //initialize bluetooth adapter
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
+        //initialize broadcast receivers
+        //bluetooth state change
+        IntentFilter BTStateChangeIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
+        registerReceiver(broadcastReceiver_btStateStatus, BTStateChangeIntent);
+        //bluetooth connection status
+        IntentFilter BTConnectionStateChangeIntent = new IntentFilter();
+        BTConnectionStateChangeIntent.addAction(BluetoothDevice.ACTION_ACL_CONNECTED);
+        BTConnectionStateChangeIntent.addAction(BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED);
+        BTConnectionStateChangeIntent.addAction(BluetoothDevice.ACTION_ACL_DISCONNECTED);
+        registerReceiver(broadcastReceiver_btConnectionStatus, BTConnectionStateChangeIntent);
+
         //enable bluetooth
         if (mBluetoothAdapter == null){
             Log.d(TAG, "enableDisableBT: Does not have BT capabilities.");
@@ -53,16 +81,12 @@ public class MainActivity extends AppCompatActivity{
         }else if (!mBluetoothAdapter.isEnabled()){
             Intent enableBTIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBTIntent, REQUEST_ENABLE_BT);
+        }else if (mBluetoothAdapter.isEnabled()){
+            //bluetooth is already enabled
+            isBTOn = true;
+            setBTStatus("Enabled", R.color.colorOn);
         }
     }
-
-
-
-
-
-
-
-
     @Override
     protected void onDestroy() {
         Log.d(TAG, "onDestroy: called");
@@ -74,17 +98,21 @@ public class MainActivity extends AppCompatActivity{
             }
         }
         try {
-            unregisterReceiver(mBroadcastReceiver1);
+            unregisterReceiver(broadcastReceiver_btStateStatus);
+            Log.d(TAG, "onDestroy: broadcastReceiver_btStateStatus unregistered");
         }catch (RuntimeException e){
-            Log.d(TAG, "onDestroy: mBroadcastReceiver1 not registered");
+            Log.e(TAG, "onDestroy: broadcastReceiver_btStateStatus not registered");
+        }
+        try {
+            unregisterReceiver(broadcastReceiver_btConnectionStatus);
+            Log.d(TAG, "onDestroy: broadcastReceiver_btConnectionStatus unregistered");
+        }catch (RuntimeException e){
+            Log.e(TAG, "onDestroy: broadcastReceiver_btConnectionStatus not registered");
         }
     }
 
 
-    public void pickColor(View view){
-        Intent intent = new Intent(this, ColorSelector.class);
-        startActivityForResult(intent, REQUEST_PICK_COLOR);
-    }
+
 
 
 
@@ -102,93 +130,72 @@ public class MainActivity extends AppCompatActivity{
                 Log.d(TAG, "request bluetooth: ok");
             }else if (resultCode == RESULT_CANCELED){
                 Log.d(TAG, "request bluetooth: canceled");
-                isConnected = false;
+                isBTOn = false;
             }
         }
     }
 
 
-    public void startBTConnection(BluetoothDevice device, UUID uuid){
-        Log.d(TAG, "startBTConnection: Initializing RFCOM Bluetooth Connection.");
-        mBluetoothConnection.startClient(device,uuid);
-    }
 
-    public void enableDisableBT(){
-        if (mBluetoothAdapter == null){
-            Log.d(TAG, "enableDisableBT: Does not have BT capabilities.");
-        }
-        if (!mBluetoothAdapter.isEnabled()){
-            Intent enableBTIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
-            startActivity(enableBTIntent);
-
-            IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-            registerReceiver(mBroadcastReceiver1, BTIntent);
-        }
-        if (mBluetoothAdapter.isEnabled()){
-            mBluetoothAdapter.disable();
-
-            IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-            registerReceiver(mBroadcastReceiver1, BTIntent);
-        }
-    }
 
     //button control for connecting/disconnecting to device
     public void connectDisconnect(View view){
         if (isConnected){
+            toConnect = false;
             disconnet();
-            isConnected = false;
         }else{
-            connect();
-            isConnected = true;
-        }
-    }
-    void connect(){
-        //if bluetooth is not enabled, turn it on
-        if (!mBluetoothAdapter.isEnabled()){
-            //prompt user to enable bluetooth
-            //then if it's enabled, connect to device (mBroadcastReceiver1)
-            Log.d(TAG, "connect: enabling bluetooth");
-            enableBluetooth();
-        }else{
-            //bt is already enabled
-            //connect to device
-            Log.d(TAG, "connect: connecting to device");
-            connectToDevice();
+            toConnect = true;
+            if (!isBTOn) {//if bluetooth is not enabled, turn it on
+                //prompt user to enable bluetooth
+                //then if it's enabled, connect to device (broadcastReceiver_btStateStatus)
+                enableBluetooth();
+            }else{
+                connectToDevice();
+            }
         }
     }
     void connectToDevice(){
+        Log.d(TAG, "connectToDevice: connecting to device");
         Log.d(TAG, "connectToDevice: started");
         mBTDevice = mBluetoothAdapter.getRemoteDevice(deviceMAC);
         mBTDevice.createBond();
-        Log.d(TAG, "onItemClick: deviceName = " + mBTDevice.getName());
-        Log.d(TAG, "onItemClick: deviceAddress = " + mBTDevice.getAddress());
+        Log.d(TAG, "connectToDevice: deviceName = " + mBTDevice.getName());
+        Log.d(TAG, "connectToDevice: deviceAddress = " + mBTDevice.getAddress());
 
         mBluetoothAdapter.cancelDiscovery();
         mBluetoothConnection = new BluetoothConnectionService(MainActivity.this);
-        startBTConnection(mBTDevice, MY_UUID_INSECURE);
+
+        Log.d(TAG, "connectToDevice: Initializing RFCOM Bluetooth Connection.");
+        mBluetoothConnection.startClient(mBTDevice,MY_UUID_INSECURE);
     }
+
+
     void disconnet(){
         if (mBluetoothConnection != null){
             Log.d(TAG, "disconnect: closing bluetooth connection");
             mBluetoothConnection.close();
             Log.d(TAG, "disconnect: bluetooth connection closed");
+            mDisconnectProgressDialog = ProgressDialog.show(this,"Disconnecting Bluetooth Device","Please Wait...",true);
+
         }
     }
-
     //enables bluetooth
     void enableBluetooth() {
         if (mBluetoothAdapter == null){
             Log.d(TAG, "enableDisableBT: Does not have BT capabilities.");
             // TODO add message dialog
         }else {
+            Log.d(TAG, "connect: enabling bluetooth");
             Intent enableBTIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             startActivityForResult(enableBTIntent, REQUEST_ENABLE_BT);
-
-            IntentFilter BTIntent = new IntentFilter(BluetoothAdapter.ACTION_STATE_CHANGED);
-            registerReceiver(mBroadcastReceiver1, BTIntent);
         }
     }
 
+
+    public void pickColor(View view){
+        Intent intent = new Intent(this, ColorSelector.class);
+        startActivityForResult(intent, REQUEST_PICK_COLOR);
+    }
     void writeToBTDevice(String message){
         try{
             byte[] bytes = message.getBytes(Charset.defaultCharset());
@@ -198,31 +205,80 @@ public class MainActivity extends AppCompatActivity{
         }
     }
 
+
+
+
     //BroadcastReceiver
     // Create a BroadcastReceiver for ACTION_FOUND.
-    private final BroadcastReceiver mBroadcastReceiver1 = new BroadcastReceiver() {
+    private final BroadcastReceiver broadcastReceiver_btStateStatus = new BroadcastReceiver() {
         public void onReceive(Context context, Intent intent) {
             String action = intent.getAction();
 
-            if (action.equals(mBluetoothAdapter.ACTION_STATE_CHANGED)) {
-                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, mBluetoothAdapter.ERROR);
+            if (action.equals(BluetoothAdapter.ACTION_STATE_CHANGED)) {
+                final int state = intent.getIntExtra(BluetoothAdapter.EXTRA_STATE, BluetoothAdapter.ERROR);
 
                 switch (state) {
                     case BluetoothAdapter.STATE_OFF:
-                        Log.d(TAG, "onReceive: STATE OFF ");
+                        Log.d(TAG, "Bluetooth State: STATE OFF ");
+                        isBTOn = false;
+                        isConnected = false;
+                        toConnect = false;
+                        setBTStatus("Disabled", R.color.colorOff);
+                        setDeviceStatus("Not Connected", R.color.colorOff);
+                        try{
+                            mDisconnectProgressDialog.dismiss();
+                        }catch (NullPointerException e){
+                            e.printStackTrace();
+                        }
                         break;
                     case BluetoothAdapter.STATE_TURNING_OFF:
-                        Log.d(TAG, "mBroadcastReceiver1: STATE TURNING OFF");
+                        Log.d(TAG, "Bluetooth State: STATE TURNING OFF");
+                        disconnet();
                         break;
                     case BluetoothAdapter.STATE_ON:
-                        Log.d(TAG, "mBroadcastReceiver1: STATE ON");
-                        //bt is enabled
-                        //so connect to device
-                        connectToDevice();
+                        Log.d(TAG, "Bluetooth State: STATE ON");
+                        setBTStatus("Enabled", R.color.colorOn);
+                        isBTOn = true;
+                        if (toConnect){
+                            connectToDevice();
+                        }
                         break;
                     case BluetoothAdapter.STATE_TURNING_ON:
-                        Log.d(TAG, "mBroadcastReceiver1: STATE TURNING ON");
+                        Log.d(TAG, "Bluetooth State: STATE TURNING ON");
                         break;
+                }
+            }
+        }
+    };
+
+    private final BroadcastReceiver broadcastReceiver_btConnectionStatus = new BroadcastReceiver() {
+        public void onReceive(Context context, Intent intent) {
+            String action = intent.getAction();
+            BluetoothDevice device = intent.getParcelableExtra(BluetoothDevice.EXTRA_DEVICE);
+
+            if (BluetoothDevice.ACTION_FOUND.equals(action)){
+                //device is found
+                Log.d(TAG, "BT Connection Status: ACTION_FOUND");
+            }
+            else if (BluetoothDevice.ACTION_ACL_CONNECTED.equals(action)){
+                //device is connected
+                Log.d(TAG, "BT Connection Status: ACTION_ACL_CONNECTED");
+                isConnected = true;
+                setDeviceStatus("Connected", R.color.colorOn);
+            }
+            else if (BluetoothDevice.ACTION_ACL_DISCONNECT_REQUESTED.equals(action)){
+                //device is about to disconnect
+                Log.d(TAG, "BT Connection Status: ACTION_ACL_DISCONNECT_REQUESTED");
+            }
+            else if (BluetoothDevice.ACTION_ACL_DISCONNECTED.equals(action)){
+                //device is disconnected
+                Log.d(TAG, "BT Connection Status: ACTION_ACL_DISCONNECTED");
+                isConnected = false;
+                setDeviceStatus("Not Connected", R.color.colorOff);
+                try{
+                    mDisconnectProgressDialog.dismiss();
+                }catch (NullPointerException e){
+                    e.printStackTrace();
                 }
             }
         }

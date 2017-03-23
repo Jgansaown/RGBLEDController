@@ -32,6 +32,7 @@ class BluetoothConnectionService {
     BluetoothConnectionService(Context context) {
         mContext = context;
         mBluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
         start();
     }
 
@@ -40,7 +41,7 @@ class BluetoothConnectionService {
     void startClient(BluetoothDevice device, UUID uuid){
         Log.d(TAG, "startClient: Started.");
         //initprogress dialog
-        mProgressDialog = ProgressDialog.show(mContext,"Connecting Bluetooth","Please Wait...",true);
+        mProgressDialog = ProgressDialog.show(mContext,"Connecting Bluetooth Device","Please Wait...",true);
         //Start trying to connect to the device
         mConnectThread = new ConnectThread(device, uuid);
         mConnectThread.start();
