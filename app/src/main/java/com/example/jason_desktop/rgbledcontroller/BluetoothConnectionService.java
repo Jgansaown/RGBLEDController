@@ -5,12 +5,15 @@ import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothSocket;
 import android.content.Context;
+import android.content.Intent;
+import android.support.v4.content.LocalBroadcastManager;
 import android.util.Log;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
+import java.util.Objects;
 import java.util.UUID;
 
 
@@ -28,6 +31,9 @@ class BluetoothConnectionService {
     //misc
     private Context mContext;
     private ProgressDialog mProgressDialog;
+
+    private String inputFromBTDevice = "";
+    private boolean nothingToSend = true;
 
     BluetoothConnectionService(Context context) {
         mContext = context;
@@ -181,7 +187,7 @@ class BluetoothConnectionService {
             mmOutStream = tmpOut;
         }
         public void run(){
-            byte[] buffer = new byte[1024];  // buffer store for the stream
+            byte[] buffer = new byte[64];  // buffer store for the stream
 
             int bytes; // bytes returned from read()
 
@@ -189,9 +195,22 @@ class BluetoothConnectionService {
             while (true) {
                 // Read from the InputStream
                 try {
+                    //int numberOfBytes = mmInStream.read() - 48;
+                    /*if (numberOfBytes == 2){
+
+                    }else{
+                        //
+                        mmInStream.read(buffer);
+                        Log.d(TAG, "InputStream: not read: " + numberOfBytes);
+                    }*/
                     bytes = mmInStream.read(buffer);
                     String incomingMessage = new String(buffer, 0, bytes);
                     Log.d(TAG, "InputStream: " + incomingMessage);
+
+                    Intent incomingMessageIntent = new Intent("incomingMessage");
+                    incomingMessageIntent.putExtra("theMessage", incomingMessage);
+                    LocalBroadcastManager.getInstance(mContext).sendBroadcast(incomingMessageIntent);
+
                 } catch (IOException e) {
                     Log.e(TAG, "write: Error reading Input Stream. " + e.getMessage() );
                     break;
