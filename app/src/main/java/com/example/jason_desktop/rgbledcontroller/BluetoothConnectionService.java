@@ -195,14 +195,6 @@ class BluetoothConnectionService {
             while (true) {
                 // Read from the InputStream
                 try {
-                    //int numberOfBytes = mmInStream.read() - 48;
-                    /*if (numberOfBytes == 2){
-
-                    }else{
-                        //
-                        mmInStream.read(buffer);
-                        Log.d(TAG, "InputStream: not read: " + numberOfBytes);
-                    }*/
                     bytes = mmInStream.read(buffer);
                     String incomingMessage = new String(buffer, 0, bytes);
                     Log.d(TAG, "InputStream: " + incomingMessage);

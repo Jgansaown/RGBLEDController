@@ -1,5 +1,6 @@
 package com.example.jason_desktop.rgbledcontroller;
 
+import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -8,20 +9,26 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 import android.widget.Button;
+import android.widget.Spinner;
+import android.widget.TabHost;
 import android.widget.TextView;
 
 import java.nio.charset.Charset;
 import java.util.Objects;
 import java.util.UUID;
 
-public class MainActivity extends AppCompatActivity{
+public class MainActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener, settingsFragment.settingSelectedListener{
     private static final String TAG = "MainActivity";
     static final int REQUEST_PICK_COLOR = 1;
     static final int REQUEST_ENABLE_BT = 2;
@@ -48,7 +55,13 @@ public class MainActivity extends AppCompatActivity{
 
     private String messageToSend;
 
+    @Override
+    public void selected(String name) {
+        Log.d(TAG, "fragment selected: " + name);
+        tvDeviceStatus.setText(name);
+    }
 
+    TabHost tabHost;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -93,12 +106,84 @@ public class MainActivity extends AppCompatActivity{
         testingread = (TextView) findViewById(R.id.textView8);
 
 
+
+        TabHost host = (TabHost) findViewById(R.id.tabHost);
+        host.setup();
+
+        TabHost.TabSpec spec = host.newTabSpec("Basic Animations");
+        spec.setContent(R.id.tab1);
+        spec.setIndicator("Basic Animations");
+        host.addTab(spec);
+
+        spec = host.newTabSpec("Advanced Animations");
+        spec.setContent(R.id.tab2);
+        spec.setIndicator("Advanced Animations");
+        host.addTab(spec);
+
+
+        basicAnimationSpinner = (Spinner) findViewById(R.id.spinner);
+        basicAnimationSpinner.setOnItemSelectedListener(this);
+        ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.BasicAnimations, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        basicAnimationSpinner.setAdapter(adapter);
+
+        advancedAnimationSpinner = (Spinner) findViewById(R.id.spinner2);
+        advancedAnimationSpinner.setOnItemSelectedListener(this);
+        adapter = ArrayAdapter.createFromResource(this, R.array.AdvancedAnimations, android.R.layout.simple_spinner_item);
+        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        advancedAnimationSpinner.setAdapter(adapter);
+
+
+        /*if (findViewById(R.id.fragment_container) != null){
+            if (savedInstanceState != null){
+                return;
+            }
+
+            settingsFragment firstFragment = new settingsFragment();
+
+            firstFragment.setArguments(getIntent().getExtras());
+
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+            transaction.add(R.id.fragment_container, firstFragment);
+            transaction.commit();
+        }*/
+
+
+
     }
+    Spinner basicAnimationSpinner;
+    Spinner advancedAnimationSpinner;
+
+    public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
+        // An item was selected. You can retrieve the selected item using
+        if (parent.equals(basicAnimationSpinner)){
+            String item = parent.getItemAtPosition(pos).toString();
+            testingread.setText("basic: " + item);
+
+            settingsFragment newFragment = new settingsFragment();
+            Bundle args = new Bundle();
+            args.putCharArray(settingsFragment.ARG_ANIMATION_NAME, item.toCharArray());
+            newFragment.setArguments(args);
+
+            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+
+            transaction.replace(R.id.fragment_container, newFragment);
+            //transaction.addToBackStack(null);
+
+            transaction.commit();
 
 
 
+        }else if (parent.equals(advancedAnimationSpinner)){
+            String item = parent.getItemAtPosition(pos).toString();
+            testingread.setText("advanced: " + item);
+        }
 
-
+    }
+    public void onNothingSelected(AdapterView<?> parent) {
+        // Another interface callback
+    }
 
 
 
@@ -246,7 +331,7 @@ public class MainActivity extends AppCompatActivity{
             byte[] bytes = message.getBytes(Charset.defaultCharset());
             mBluetoothConnection.write(bytes);
         }catch (NullPointerException e){
-            Log.e(TAG, "btnSend: " + e.getMessage());
+            Log.e(TAG, "writeToBTDevice: " + e.getMessage());
         }
     }
     //write message to bt device (byte)
@@ -255,7 +340,7 @@ public class MainActivity extends AppCompatActivity{
             byte[] bytes = {message};
             mBluetoothConnection.write(bytes);
         }catch (NullPointerException e){
-            Log.e(TAG, "btnSend: " + e.getMessage());
+            Log.e(TAG, "writeToBTDevice: " + e.getMessage());
         }
     }
 

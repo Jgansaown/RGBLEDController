@@ -5,229 +5,220 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <android.support.v4.widget.NestedScrollView
+    <android.support.constraint.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent"
-        app:layout_behavior="android.support.design.widget.AppBarLayout$ScrollingViewBehavior">
+        tools:context="com.example.jason_desktop.rgbledcontroller.MainActivity">
 
-        <android.support.constraint.ConstraintLayout
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            tools:context="com.example.jason_desktop.rgbledcontroller.MainActivity">
+        <TableLayout
+            android:id="@+id/status_tableLayout"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toLeftOf="@+id/btnConnect"
+            app:layout_constraintTop_toTopOf="parent">
 
-            <TableLayout
-                android:id="@+id/status_tableLayout"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp"
-                android:layout_marginTop="16dp"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toLeftOf="@+id/btnConnect"
-                app:layout_constraintTop_toTopOf="parent">
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
 
-                <TableRow
+                <TextView
+                    android:id="@+id/label_BTStatus"
+                    android:layout_width="130dp"
+                    android:layout_height="wrap_content"
+                    android:layout_column="0"
+                    android:layout_row="0"
+                    android:text="Bluetooth Status:"
+                    app:layout_constraintLeft_toLeftOf="parent"
+                    app:layout_constraintTop_toTopOf="parent" />
+
+                <TextView
+                    android:id="@+id/tvBTStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_column="1"
+                    android:layout_row="0"
+                    android:text="Disabled"
+                    android:textColor="@color/colorOff"
+                    app:layout_constraintBaseline_toBaselineOf="@+id/label_BTStatus"
+                    app:layout_constraintLeft_toRightOf="@+id/label_BTStatus"
+                    app:layout_constraintRight_toLeftOf="@+id/btnConnect" />
+            </TableRow>
+
+            <TableRow
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+
+                <TextView
+                    android:id="@+id/label_DeviceStatus"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_column="0"
+                    android:layout_row="1"
+                    android:text="Device Status:"
+                    tools:layout_editor_absoluteX="70dp"
+                    tools:layout_editor_absoluteY="207dp" />
+
+                <TextView
+                    android:id="@+id/tvDeviceStatus"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_column="1"
+                    android:layout_row="1"
+                    android:text="Not Connected"
+                    android:textAlignment="viewStart"
+                    android:textColor="@color/colorOff"
+                    tools:layout_editor_absoluteX="121dp"
+                    tools:layout_editor_absoluteY="0dp" />
+
+            </TableRow>
+
+        </TableLayout>
+
+        <Button
+            android:id="@+id/btnConnect"
+            style="@style/Widget.AppCompat.Button.Colored"
+            android:layout_width="110dp"
+            android:layout_height="wrap_content"
+            android:layout_column="2"
+            android:layout_marginEnd="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_row="0"
+            android:layout_weight="1"
+            android:onClick="connectDisconnect"
+            android:text="Connect"
+            android:textAlignment="center"
+            app:layout_columnSpan="2"
+            app:layout_constraintBottom_toBottomOf="@+id/status_tableLayout"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toTopOf="@+id/status_tableLayout"
+            app:layout_constraintVertical_bias="0.533"
+            app:layout_rowSpan="2"
+            app:layout_rowWeight="2" />
+
+        <Button
+            android:id="@+id/button2"
+            style="@style/Widget.AppCompat.Button.Borderless.Colored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginStart="16dp"
+            android:onClick="pickColor"
+            android:text="Button"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintLeft_toLeftOf="parent" />
+
+        <TextView
+            android:id="@+id/textView8"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginBottom="0dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginStart="16dp"
+            android:gravity="center"
+            android:text="TextView"
+            android:textAlignment="center"
+            android:visibility="visible"
+            app:layout_constraintBottom_toBottomOf="@+id/button2"
+            app:layout_constraintLeft_toRightOf="@+id/button2"
+            app:layout_constraintRight_toLeftOf="@+id/button"
+            app:layout_constraintTop_toTopOf="@+id/button2"
+            app:layout_constraintVertical_bias="0.0" />
+
+        <Button
+            android:id="@+id/button"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginEnd="16dp"
+            android:layout_marginRight="16dp"
+            android:onClick="testsend"
+            android:text="Button"
+            app:layout_constraintBaseline_toBaselineOf="@+id/textView8"
+            app:layout_constraintRight_toRightOf="parent" />
+
+        <TabHost
+            android:id="@+id/tabHost"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginLeft="0dp"
+            android:layout_marginRight="0dp"
+            android:layout_marginTop="16dp"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/status_tableLayout"
+            android:layout_marginBottom="16dp"
+            app:layout_constraintBottom_toTopOf="@+id/textView8">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <TabWidget
+                    android:id="@android:id/tabs"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content" />
+
+                <FrameLayout
+                    android:id="@android:id/tabcontent"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent">
 
-                    <TextView
-                        android:id="@+id/label_BTStatus"
-                        android:layout_width="130dp"
-                        android:layout_height="wrap_content"
-                        android:layout_column="0"
-                        android:layout_row="0"
-                        android:text="Bluetooth Status:"
-                        app:layout_constraintLeft_toLeftOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <TextView
-                        android:id="@+id/tvBTStatus"
+                    <LinearLayout
+                        android:id="@+id/tab1"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_column="1"
-                        android:layout_row="0"
-                        android:text="Disabled"
-                        android:textColor="@color/colorOff"
-                        app:layout_constraintBaseline_toBaselineOf="@+id/label_BTStatus"
-                        app:layout_constraintLeft_toRightOf="@+id/label_BTStatus"
-                        app:layout_constraintRight_toLeftOf="@+id/btnConnect" />
-                </TableRow>
+                        android:layout_height="match_parent"
+                        android:orientation="vertical">
 
-                <TableRow
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
+                        <Spinner
+                            android:id="@+id/spinner"
+                            android:layout_width="match_parent"
+                            android:layout_height="35dp"
+                            android:layout_marginBottom="16dp"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginTop="16dp"
+                            android:dropDownWidth="match_parent" />
 
-                    <TextView
-                        android:id="@+id/label_DeviceStatus"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_column="0"
-                        android:layout_row="1"
-                        android:text="Device Status:"
-                        tools:layout_editor_absoluteX="70dp"
-                        tools:layout_editor_absoluteY="207dp" />
+                        <FrameLayout
+                            android:id="@+id/fragment_container"
+                            android:layout_width="match_parent"
+                            android:layout_height="match_parent">
 
-                    <TextView
-                        android:id="@+id/tvDeviceStatus"
+                        </FrameLayout>
+                    </LinearLayout>
+
+                    <LinearLayout
+                        android:id="@+id/tab2"
                         android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_column="1"
-                        android:layout_row="1"
-                        android:text="Not Connected"
-                        android:textAlignment="viewStart"
-                        android:textColor="@color/colorOff"
-                        tools:layout_editor_absoluteX="121dp"
-                        tools:layout_editor_absoluteY="0dp" />
+                        android:layout_height="match_parent"
+                        android:orientation="vertical">
 
-                </TableRow>
+                        <Spinner
+                            android:id="@+id/spinner2"
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:layout_marginBottom="16dp"
+                            android:layout_marginEnd="16dp"
+                            android:layout_marginStart="16dp"
+                            android:layout_marginTop="16dp" />
 
-            </TableLayout>
+                    </LinearLayout>
 
-            <Button
-                android:id="@+id/btnConnect"
-                style="@style/Widget.AppCompat.Button.Colored"
-                android:layout_width="110dp"
-                android:layout_height="wrap_content"
-                android:layout_column="2"
-                android:layout_marginBottom="0dp"
-                android:layout_marginRight="16dp"
-                android:layout_marginTop="0dp"
-                android:layout_row="0"
-                android:layout_weight="1"
-                android:onClick="connectDisconnect"
-                android:text="Connect"
-                android:textAlignment="center"
-                app:layout_columnSpan="2"
-                app:layout_constraintBottom_toBottomOf="@+id/status_tableLayout"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/status_tableLayout"
-                app:layout_constraintVertical_bias="0.533"
-                app:layout_rowSpan="2"
-                app:layout_rowWeight="2" />
+                </FrameLayout>
+            </LinearLayout>
+        </TabHost>
 
-            <Button
-                android:id="@+id/button2"
-                style="@style/Widget.AppCompat.Button.Borderless.Colored"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp"
-                android:layout_marginStart="16dp"
-                android:onClick="pickColor"
-                android:text="Button"
-                android:visibility="visible"
-                app:layout_constraintLeft_toLeftOf="parent"
-                android:layout_marginTop="236dp"
-                app:layout_constraintTop_toBottomOf="@+id/textView3" />
+    </android.support.constraint.ConstraintLayout>
 
-            <TextView
-                android:id="@+id/textView8"
-                android:layout_width="0dp"
-                android:layout_height="0dp"
-                android:layout_marginBottom="0dp"
-                android:layout_marginEnd="16dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp"
-                android:layout_marginStart="16dp"
-                android:gravity="center"
-                android:text="TextView"
-                android:textAlignment="center"
-                android:visibility="visible"
-                app:layout_constraintBottom_toBottomOf="@+id/button2"
-                app:layout_constraintHorizontal_bias="0.0"
-                app:layout_constraintLeft_toRightOf="@+id/button2"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toTopOf="@+id/button2"
-                app:layout_constraintVertical_bias="0.0" />
-
-            <TextView
-                android:id="@+id/textView"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginLeft="16dp"
-                android:layout_marginTop="16dp"
-                android:text="Basic Animations:"
-                android:textAppearance="@style/TextAppearance.AppCompat.Medium"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/status_tableLayout" />
-
-            <RadioGroup
-                android:id="@+id/basic_controls"
-                android:layout_width="380dp"
-                android:layout_height="218dp"
-                android:layout_marginLeft="16dp"
-                android:layout_marginRight="16dp"
-                android:layout_marginTop="8dp"
-                app:layout_constraintLeft_toLeftOf="parent"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/textView"
-                app:layout_constraintHorizontal_bias="0.0">
-
-                <RadioButton
-                    android:id="@+id/radioButton"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Solid Color"
-                    tools:layout_editor_absoluteX="135dp"
-                    tools:layout_editor_absoluteY="132dp" />
-
-                <RadioButton
-                    android:id="@+id/radioButton5"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Fading" />
-
-                <RadioButton
-                    android:id="@+id/radioButton3"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Blinking" />
-
-                <RadioButton
-                    android:id="@+id/radioButton2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="Rainbow" />
-
-                <RadioButton
-                    android:id="@+id/radioButton4"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="RadioButton" />
-
-                <RadioButton
-                    android:id="@+id/radioButton6"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_weight="1"
-                    android:text="RadioButton" />
-            </RadioGroup>
-
-            <TextView
-                android:id="@+id/textView3"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginTop="16dp"
-                android:text="Advanced Animation"
-                app:layout_constraintTop_toBottomOf="@+id/basic_controls"
-                android:layout_marginLeft="16dp"
-                app:layout_constraintLeft_toLeftOf="parent" />
-
-            <Button
-                android:id="@+id/button"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="16dp"
-                android:layout_marginTop="16dp"
-                android:onClick="testsend"
-                android:text="Button"
-                app:layout_constraintRight_toRightOf="parent"
-                app:layout_constraintTop_toBottomOf="@+id/basic_controls" />
-
-        </android.support.constraint.ConstraintLayout>
-    </android.support.v4.widget.NestedScrollView>
 </android.support.design.widget.CoordinatorLayout>
