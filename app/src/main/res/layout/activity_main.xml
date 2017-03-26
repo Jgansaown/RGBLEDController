@@ -101,6 +101,36 @@
             app:layout_rowSpan="2"
             app:layout_rowWeight="2" />
 
+        <Spinner
+            android:id="@+id/spinner"
+            style="@android:style/Widget.Material.Light.Spinner.Underlined"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginTop="16dp"
+            android:dropDownWidth="match_parent"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/status_tableLayout" />
+
+        <FrameLayout
+            android:id="@+id/fragment_container"
+            android:layout_width="0dp"
+            android:layout_height="0dp"
+            android:layout_marginBottom="16dp"
+            android:layout_marginLeft="16dp"
+            android:layout_marginRight="16dp"
+            android:layout_marginTop="0dp"
+            app:layout_constraintBottom_toTopOf="@+id/textView8"
+            app:layout_constraintHorizontal_bias="0.0"
+            app:layout_constraintLeft_toLeftOf="parent"
+            app:layout_constraintRight_toRightOf="parent"
+            app:layout_constraintTop_toBottomOf="@+id/spinner">
+
+        </FrameLayout>
+
         <Button
             android:id="@+id/button2"
             style="@style/Widget.AppCompat.Button.Borderless.Colored"
@@ -111,7 +141,7 @@
             android:layout_marginStart="16dp"
             android:onClick="pickColor"
             android:text="Button"
-            android:visibility="visible"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintLeft_toLeftOf="parent" />
 
@@ -119,7 +149,6 @@
             android:id="@+id/textView8"
             android:layout_width="0dp"
             android:layout_height="0dp"
-            android:layout_marginBottom="0dp"
             android:layout_marginEnd="16dp"
             android:layout_marginLeft="16dp"
             android:layout_marginRight="16dp"
@@ -127,7 +156,7 @@
             android:gravity="center"
             android:text="TextView"
             android:textAlignment="center"
-            android:visibility="visible"
+            android:visibility="gone"
             app:layout_constraintBottom_toBottomOf="@+id/button2"
             app:layout_constraintLeft_toRightOf="@+id/button2"
             app:layout_constraintRight_toLeftOf="@+id/button"
@@ -142,82 +171,9 @@
             android:layout_marginRight="16dp"
             android:onClick="testsend"
             android:text="Button"
+            android:visibility="gone"
             app:layout_constraintBaseline_toBaselineOf="@+id/textView8"
             app:layout_constraintRight_toRightOf="parent" />
-
-        <TabHost
-            android:id="@+id/tabHost"
-            android:layout_width="0dp"
-            android:layout_height="0dp"
-            android:layout_marginLeft="0dp"
-            android:layout_marginRight="0dp"
-            android:layout_marginTop="16dp"
-            app:layout_constraintHorizontal_bias="0.0"
-            app:layout_constraintLeft_toLeftOf="parent"
-            app:layout_constraintRight_toRightOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/status_tableLayout"
-            android:layout_marginBottom="16dp"
-            app:layout_constraintBottom_toTopOf="@+id/textView8">
-
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
-
-                <TabWidget
-                    android:id="@android:id/tabs"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-                <FrameLayout
-                    android:id="@android:id/tabcontent"
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent">
-
-                    <LinearLayout
-                        android:id="@+id/tab1"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="vertical">
-
-                        <Spinner
-                            android:id="@+id/spinner"
-                            android:layout_width="match_parent"
-                            android:layout_height="35dp"
-                            android:layout_marginBottom="16dp"
-                            android:layout_marginEnd="16dp"
-                            android:layout_marginStart="16dp"
-                            android:layout_marginTop="16dp"
-                            android:dropDownWidth="match_parent" />
-
-                        <FrameLayout
-                            android:id="@+id/fragment_container"
-                            android:layout_width="match_parent"
-                            android:layout_height="match_parent">
-
-                        </FrameLayout>
-                    </LinearLayout>
-
-                    <LinearLayout
-                        android:id="@+id/tab2"
-                        android:layout_width="match_parent"
-                        android:layout_height="match_parent"
-                        android:orientation="vertical">
-
-                        <Spinner
-                            android:id="@+id/spinner2"
-                            android:layout_width="match_parent"
-                            android:layout_height="wrap_content"
-                            android:layout_marginBottom="16dp"
-                            android:layout_marginEnd="16dp"
-                            android:layout_marginStart="16dp"
-                            android:layout_marginTop="16dp" />
-
-                    </LinearLayout>
-
-                </FrameLayout>
-            </LinearLayout>
-        </TabHost>
 
     </android.support.constraint.ConstraintLayout>
 

@@ -2,22 +2,22 @@
 <resources>
     <string-array name="BasicAnimations">
         <item>Solid Color</item>
-        <item>Fading</item>
-        <item>Blinking</item>
-        <item>Rainbow</item>
-        <item>Jupiter</item>
-        <item>Saturn</item>
-        <item>Uranus</item>
-        <item>Neptune</item>
-    </string-array>
-    <string-array name="AdvancedAnimations">
-        <item>Mercury</item>
-        <item>Venus</item>
-        <item>Earth</item>
-        <item>Mars</item>
-        <item>Jupiter</item>
-        <item>Saturn</item>
-        <item>Uranus</item>
-        <item>Neptune</item>
+        <item>Solid Pulse</item>
+        <item>Solid Rainbow</item>
+        <item>Solid Rainbow Pulse</item>
+        <item>Rainbow Cycle</item>
+        <item>Rainbow With Glitter</item>
+        <item>Confetti</item>
+        <item>Sinelon</item>
+        <item>Juggle</item>
+        <item>BPM</item>
+        <item>Two Strips Rainbow</item>
+        <item>Two Strips Rainbow Cycle</item>
+        <item>Two Strips Sinelon</item>
+        <item>Circle</item>
+        <item>Circle Rainbow</item>
+        <item>Alternate</item>
+        <item>Alternate Opposite</item>
+        <item>DemoReel</item>
     </string-array>
 </resources>

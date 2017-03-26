@@ -53,6 +53,8 @@ public class ColorSelector extends AppCompatActivity {
 
 
         setTitle("Color Selector");
+
+
         initializeVariables();
         SeekBar_Setup();
 

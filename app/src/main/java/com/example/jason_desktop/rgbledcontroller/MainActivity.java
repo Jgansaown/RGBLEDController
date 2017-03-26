@@ -1,6 +1,5 @@
 package com.example.jason_desktop.rgbledcontroller;
 
-import android.app.Fragment;
 import android.app.ProgressDialog;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
@@ -15,7 +14,6 @@ import android.support.v4.content.LocalBroadcastManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.Menu;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -40,8 +38,9 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
     TextView tvBTStatus;
     TextView tvDeviceStatus;
 
-
     TextView testingread;
+
+    Spinner animationSpinner;
 
     //bluetooth
     BluetoothConnectionService mBluetoothConnection;
@@ -55,10 +54,13 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     private String messageToSend;
 
+    //input back from fragments
     @Override
     public void selected(String name) {
         Log.d(TAG, "fragment selected: " + name);
-        tvDeviceStatus.setText(name);
+        //tvDeviceStatus.setText(name);
+        sendMessagetoBTDevice(name);
+
     }
 
     TabHost tabHost;
@@ -106,64 +108,26 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
         testingread = (TextView) findViewById(R.id.textView8);
 
 
-
-        TabHost host = (TabHost) findViewById(R.id.tabHost);
-        host.setup();
-
-        TabHost.TabSpec spec = host.newTabSpec("Basic Animations");
-        spec.setContent(R.id.tab1);
-        spec.setIndicator("Basic Animations");
-        host.addTab(spec);
-
-        spec = host.newTabSpec("Advanced Animations");
-        spec.setContent(R.id.tab2);
-        spec.setIndicator("Advanced Animations");
-        host.addTab(spec);
-
-
-        basicAnimationSpinner = (Spinner) findViewById(R.id.spinner);
-        basicAnimationSpinner.setOnItemSelectedListener(this);
+        //spinner initialize
+        animationSpinner = (Spinner) findViewById(R.id.spinner);
+        animationSpinner.setOnItemSelectedListener(this);
         ArrayAdapter<CharSequence> adapter = ArrayAdapter.createFromResource(this, R.array.BasicAnimations, android.R.layout.simple_spinner_item);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        basicAnimationSpinner.setAdapter(adapter);
-
-        advancedAnimationSpinner = (Spinner) findViewById(R.id.spinner2);
-        advancedAnimationSpinner.setOnItemSelectedListener(this);
-        adapter = ArrayAdapter.createFromResource(this, R.array.AdvancedAnimations, android.R.layout.simple_spinner_item);
-        adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        advancedAnimationSpinner.setAdapter(adapter);
-
-
-        /*if (findViewById(R.id.fragment_container) != null){
-            if (savedInstanceState != null){
-                return;
-            }
-
-            settingsFragment firstFragment = new settingsFragment();
-
-            firstFragment.setArguments(getIntent().getExtras());
-
-            FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-
-            transaction.add(R.id.fragment_container, firstFragment);
-            transaction.commit();
-        }*/
-
-
-
+        animationSpinner.setAdapter(adapter);
     }
-    Spinner basicAnimationSpinner;
-    Spinner advancedAnimationSpinner;
+
+
 
     public void onItemSelected(AdapterView<?> parent, View view, int pos, long id) {
         // An item was selected. You can retrieve the selected item using
-        if (parent.equals(basicAnimationSpinner)){
+        if (parent.equals(animationSpinner)){
             String item = parent.getItemAtPosition(pos).toString();
-            testingread.setText("basic: " + item);
+            testingread.setText("basic: " + pos + " " + item);
 
             settingsFragment newFragment = new settingsFragment();
             Bundle args = new Bundle();
             args.putCharArray(settingsFragment.ARG_ANIMATION_NAME, item.toCharArray());
+            args.putInt("function", pos);
             newFragment.setArguments(args);
 
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
@@ -175,9 +139,6 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
 
 
-        }else if (parent.equals(advancedAnimationSpinner)){
-            String item = parent.getItemAtPosition(pos).toString();
-            testingread.setText("advanced: " + item);
         }
 
     }
@@ -224,6 +185,7 @@ public class MainActivity extends AppCompatActivity implements AdapterView.OnIte
 
     @Override
     protected void onActivityResult(int requestCode,int resultCode,Intent data){
+        super.onActivityResult(requestCode, resultCode, data);
         TextView test = (TextView) findViewById(R.id.textView8);
         // Check which request we're responding to
         if (requestCode == REQUEST_PICK_COLOR) {// Make sure the request was successful
